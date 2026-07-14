@@ -1,5 +1,5 @@
 function logDownload() {
-    document.getElementById("status").innerText = "Download started... Thank you for choosing NetPlus!";
+    document.getElementById("status").innerText = "Download started... Thank you for downloading NetPlus!";
     console.log("User clicked download button");
 }
 
