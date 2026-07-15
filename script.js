@@ -1,13 +1,10 @@
-function logDownload() {
-    document.getElementById("status").innerText = "Download started... Thank you for downloading NetPlus!";
-    console.log("User clicked download button");
-}
+// الكود الذي يكتشف نوع الجهاز
+const platform = navigator.platform.toLowerCase();
+const userAgent = navigator.userAgent.toLowerCase();
 
-// كود بسيط للتحقق من الإصدار لاحقاً
-async function checkVersion() {
-    const response = await fetch('version.txt');
-    const version = await response.text();
-    console.log("Current version on server: " + version);
+if (userAgent.includes("android")) {
+    console.log("User is on Android");
+    // هنا يمكننا تغيير نص أو إظهار زر خاص بالـ Termux
+} else if (platform.includes("win")) {
+    console.log("User is on Windows");
 }
-
-checkVersion();
