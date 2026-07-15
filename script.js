@@ -1,10 +1,12 @@
-// الكود الذي يكتشف نوع الجهاز
-const platform = navigator.platform.toLowerCase();
-const userAgent = navigator.userAgent.toLowerCase();
+// نقوم بجلب رقم الإصدار من الملف
+fetch('version.txt')
+    .then(response => response.text())
+    .then(version => {
+        version = version.trim(); // تنظيف النص من أي مسافات
+        console.log("Current Version: " + version);
 
-if (userAgent.includes("android")) {
-    console.log("User is on Android");
-    // هنا يمكننا تغيير نص أو إظهار زر خاص بالـ Termux
-} else if (platform.includes("win")) {
-    console.log("User is on Windows");
-}
+        // هنا نقوم بتحديث الروابط ديناميكياً
+        const winLink = document.getElementById('win-download');
+        winLink.href = `downloads/NetPlus-${version}.exe`;
+        winLink.innerText = `Download NetPlus ${version} for Windows`;
+    });
