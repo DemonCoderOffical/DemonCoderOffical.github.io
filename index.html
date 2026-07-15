@@ -1,22 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>NetPlus Installer</title>
+    <title>Download NetPlus</title>
     <style>
-        body { background-color: #121212; color: #ffffff; font-family: sans-serif; text-align: center; padding-top: 100px; }
-        .btn { background-color: #007ACC; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .btn:hover { background-color: #005f9e; }
-        #status { margin-top: 20px; color: #888; }
+        body { font-family: sans-serif; text-align: center; background: #121212; color: white; padding-top: 50px; }
+        .btn { display: block; width: 200px; margin: 10px auto; padding: 15px; background: #007ACC; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn:hover { background: #005f9e; }
     </style>
 </head>
 <body>
-    <h1>Download NetPlus</h1>
-    <p>The best assiant.</p>
-    <br>
-    <a href="NetPlus_Setup.exe" class="btn" onclick="logDownload()">Download NetPlus</a>
-    <p id="status"></p>
-
-    <script src="script.js"></script>
+    <h1>Select Your Platform</h1>
+    <a href="downloads/NetPlus.exe" class="btn">Windows (.exe)</a>
+    <a href="downloads/NetPlus.sh" class="btn">Linux / Debian (.sh)</a>
+    <a href="downloads/NetPlus.sh" class="btn">Android (Termux)</a>
+    <a href="#" class="btn">MacOS (Coming Soon)</a>
 </body>
 </html>
