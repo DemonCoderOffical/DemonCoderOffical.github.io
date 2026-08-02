@@ -85,14 +85,17 @@
             background-color: #00bcd4;
             color: #0f0f0f;
         }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #cccccc;
+        .back-link, .bug-link {
+            color: #00bcd4;
             text-decoration: none;
         }
-        .back-link:hover {
-            color: #00bcd4;
+        .back-link:hover, .bug-link:hover {
+            text-decoration: underline;
+        }
+        .bug-section {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
         }
     </style>
 </head>
@@ -151,8 +154,12 @@
             </a>
         </div>
 
+        <div class="bug-section">
+            <p>Found a bug? <a href="https://demoncoderoffical.github.io/submit" class="bug-link">Report it here</a></p>
+        </div>
+
         <br>
-        <a href="../index.html" class="back-link">← Back to Home Page</a>
+        <a href="../index.html" class="back-link" style="color: #cccccc;">← Back to Home Page</a>
     </div>
 
     <script>
