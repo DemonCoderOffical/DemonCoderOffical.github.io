@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPlus - Submit Bug & Feedback</title>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #cccccc;
+            font-family: 'Consolas', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            border: 2px solid #00bcd4;
+            padding: 25px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0px 0px 15px rgba(0, 188, 212, 0.3);
+        }
+        h1, h2 {
+            color: #00bcd4;
+        }
+        p {
+            color: #cccccc;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00bcd4;
+            font-weight: bold;
+        }
+        input[type="email"], textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #000;
+            border: 1px solid #00bcd4;
+            color: #00bcd4;
+            font-family: 'Consolas', monospace;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 120px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .checkbox-container input {
+            accent-color: #00bcd4;
+            width: 18px;
+            height: 18px;
+        }
+        .checkbox-container label {
+            margin-bottom: 0;
+            color: #cccccc;
+            font-weight: normal;
+        }
+        .submit-btn {
+            background-color: #00838f;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: #00bcd4;
+            color: #0f0f0f;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #cccccc;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #00bcd4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Submit a Bug</h1>
+        <p>Found an issue in NetPlus? Let me know by filling out the form below.</p>
+        
+        <!-- Using Formspree to send the submissions directly to h34351449@gmail.com without needing a backend server -->
+        <form action="https://formspree.io/f/h34351449@gmail.com" method="POST">
+            
+            <div class="form-group">
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="bug">Describe the Bug:</label>
+                <textarea id="bug" name="bug_description" required placeholder="Explain what happened and how to reproduce it..."></textarea>
+            </div>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="newsletter" name="notify_new_version" value="Yes">
+                <label for="newsletter">Say to me if there is a new version released</label>
+            </div>
+
+            <button type="submit" class="submit-btn">Send Bug Report</button>
+        </form>
+
+        <a href="../index.html" class="back-link">← Back to Home Page</a>
+    </div>
+
+</body>
+</html>
