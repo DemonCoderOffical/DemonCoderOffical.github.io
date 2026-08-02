@@ -1,17 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Download NetPlus</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPlus - Download</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #121212; color: white; padding-top: 50px; }
-        .btn { display: block; width: 200px; margin: 10px auto; padding: 15px; background: #007ACC; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .btn:hover { background: #005f9e; }
+        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: white; padding: 50px; }
+        .icon { width: 120px; height: 120px; margin-bottom: 20px; }
+        h1 { margin-bottom: 5px; }
+        p { color: #888; margin-bottom: 40px; }
+        .download-btn { display: inline-block; background: #007bff; color: white; padding: 12px 24px; margin: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .download-btn:hover { background: #0056b3; }
+        .disabled { background: #333; color: #666; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <h1>Select Your Platform</h1>
-    <a href="NetPlus.exe" class="btn">Windows</a>
-    <a href=""class="btn">Linux / Debian(Coming Soon)</a>
-    <a href="" class="btn">MacOS (Coming Soon)</a>
+
+    <!-- Put your icon image file path here -->
+    <img src="netplus-icon.png" alt="NetPlus Icon" class="icon">
+    
+    <h1>Download NetPlus</h1>
+    <p>Select your platform to get started</p>
+
+    <!-Install files -!>
+    <a href="downloads/netplus_windows.exe" class="download-btn">Windows</a>
+    <a href="#" class="download-btn disabled">Linux / Debian (Coming Soon)</a>
+    <a href="#" class="download-btn disabled">MacOS (Coming Soon)</a>
+
 </body>
 </html>
