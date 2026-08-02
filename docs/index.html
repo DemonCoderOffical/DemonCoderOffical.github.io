@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPlus v0.3 - Documentation</title>
+    <style>
+        /* Main page styling and dark hacker theme */
+        body {
+            background-color: #0f0f0f;
+            color: #00ff00;
+            font-family: 'Consolas', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            border: 2px solid #00ff00;
+            padding: 25px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0px 0px 15px rgba(0, 255, 0, 0.3);
+        }
+        /* Tabs container layout */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 20px;
+        }
+        /* Individual tab buttons */
+        .tab-btn {
+            background-color: #111;
+            color: #00ff00;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Consolas', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+            transition: 0.3s;
+        }
+        /* Active tab button state */
+        .tab-btn.active {
+            background-color: #00ff00;
+            color: #000;
+        }
+        /* Hide inactive tab contents */
+        .tab-content {
+            display: none;
+        }
+        /* Show active tab content */
+        .tab-content.active {
+            display: block;
+        }
+        /* Terminal code boxes style */
+        pre {
+            background-color: #000;
+            padding: 15px;
+            border-left: 4px solid #00ff00;
+            overflow-x: auto;
+            color: #00ff00;
+        }
+        ul {
+            line-height: 1.6;
+        }
+        /* Official link download button style */
+        .download-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #00aa00;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .download-btn:hover {
+            background-color: #00ff00;
+            color: #000;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #aaaaaa;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>NetPlus v0.3 Documentation</h1>
+
+        <!-- Navigation Tabs Header -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'aboutTab')">About</button>
+            <button class="tab-btn" onclick="openTab(event, 'installTab')">Installation</button>
+        </div>
+
+        <!-- About Tab Content Section -->
+        <div id="aboutTab" class="tab-content active">
+            <h2>About NetPlus</h2>
+            <p>NetPlus is an advanced network toolkit designed for terminal enthusiasts and network analysis. It provides interactive menus, scan modes, and local interface diagnostics.</p>
+            
+            <h3>Available Commands & Features:</h3>
+            <ul>
+                <li><strong>1 (General Info / About):</strong> Displays tool version and core developer details.</li>
+                <li><strong>2 (SCAN Mode):</strong> Activates the sub-menu for network diagnostics and tools.
+                    <ul>
+                        <li><code>help</code>: Shows scan examples and available options inside scan mode.</li>
+                        <li><code>3</code>: Displays local machine Hostname and Local IP details using socket connections.</li>
+                        <li><code>back</code>: Returns to the main terminal menu.</li>
+                    </ul>
+                </li>
+                <li><strong>exit</strong>: Safely exits the NetPlus application.</li>
+            </ul>
+
+            <h3>Architecture Preview:</h3>
+            <pre>
+    _  _      _   ___ _             
+    | \| |___ | |_| _ \ |_  _ ___ ___ 
+    | .` / -_)|  _|  _/ | || (_-</ -_)
+    |_|\_\___| \__|_| |_|\_,_/__/\___|
+    [ NetPlus v0.3 - Network Toolkit ]
+            </pre>
+        </div>
+
+        <!-- Installation Tab Content Section -->
+        <div id="installTab" class="tab-content">
+            <h2>How to Download & Install NetPlus</h2>
+            <p>Follow these simple steps to get and run NetPlus:</p>
+            
+            <ol>
+                <li>Visit the official project page to get the files.</li>
+                <li>Download the package from our main hub.</li>
+                <li>Extract and run the Python script:</li>
+            </ol>
+
+            <pre>python netplus.py</pre>
+
+            <p>Get it now from the official page:</p>
+            <!-- Link directing to official hub -->
+            <a href="https://demoncoderoffical.github.io" target="_blank" class="download-btn">
+                🔗 Visit DemonCoderOffical.github.io
+            </a>
+        </div>
+
+        <br>
+        <a href="../index.html" class="back-link">← Back to Home Page</a>
+    </div>
+
+    <!-- JavaScript logic to handle tab switching functionality -->
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabContent, tabBtns;
+            
+            // Hide all tab contents
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].classList.remove("active");
+            }
+            
+            // Remove active class from all tab buttons
+            tabBtns = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+            
+            // Display chosen tab and highlight its button
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+
+</body>
+</html>
