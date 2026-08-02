@@ -1,1 +1,1 @@
-NetPlus is a file that scan ports guessing passwords try brute force
+NetPlus is a file that scan ports guessing passwords try brute force for more info visit [docs page](httos://DemonCoderOffical.github.io/docs) 
