@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoidCoderStudio - Scanme Sandbox</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #00ff66;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+        h1 { color: #ffffff; text-shadow: 0 0 10px #00ff66; }
+        ul { list-style-type: square; line-height: 1.8; }
+        a { color: #00bcd4; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .hidden-loot { display: none; } /* Hides sensitive paths from basic HTML scrapers */
+        .blocked-screen {
+            background-color: #1a0000;
+            border: 2px solid #ff0033;
+            color: #ff3333;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            display: none;
+        }
+        .blocked-screen h2 { font-size: 24px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-interface">
+        <h1>GO NOW AND SCAN ME 🦈</h1>
+        <p>[*] Status: Target Online & Vulnerable Sandbox Ready</p>
+        <p>[*] Public directory index for NetPlus analysis:</p>
+        
+        <ul>
+            <li><a href="./index.html">/index.html</a> (200 OK)</li>
+            <li><a href="./assets/main.js">/assets/main.js</a> (200 OK)</li>
+            <li><a href="./assets/style.css">/assets/style.css</a> (200 OK)</li>
+        </ul>
+
+        <hr style="border-color: #00ff66; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">[+] NetPlus Toolkit compatibility verified v1.8</p>
+    </div>
+
+    <!-- Firewall Block Screen (Triggers after 15 requests) -->
+    <div class="blocked-screen" id="firewall-block">
+        <h2>403 FORBIDDEN - WEB APPLICATION FIREWALL</h2>
+        <p><strong>Note: We have been blocked from the server try -FLL to skip the firewall</strong></p>
+        <p style="font-size: 12px; color: #ff9999; margin-top: 20px;">Rate limit exceeded: Max 15 scan queries allowed per session.</p>
+    </div>
+
+    <!-- Hidden loot vault obfuscated from direct regex scrapers -->
+    <div class="hidden-loot" id="loot-storage" data-payload="ZmxhZ3t5MHVfc3VjYzNzc2Z1bGx5X2hhY2tlZF90aGVfcmVwb30=">
+        <!-- 
+            Secret paths hidden from automated index parsers:
+            - /loot/credentials.txt
+            - /loot/database_backup.sql
+            - /loot/admin_panel.php
+        -->
+    </div>
+
+    <script>
+        // Client-side rate limiting simulation using localStorage
+        const SCAN_LIMIT = 15;
+        const STORAGE_KEY = 'netplus_scan_tracker';
+
+        let currentScans = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+        currentScans++;
+        localStorage.setItem(STORAGE_KEY, currentScans);
+
+        // If the same visitor hits the page more than 15 times, trigger the firewall block message
+        if (currentScans > SCAN_LIMIT) {
+            document.getElementById('main-interface').style.display = 'none';
+            document.getElementById('firewall-block').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
