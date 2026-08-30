@@ -5,7 +5,6 @@ Netplus is a free open source tool. [Start here](https://voidcoderstudio.github.
 ## What is NetPlus?
 
 NetPlus is an ultimate multi-language networking toolkit designed for network analysis, port scanning, and OS fingerprinting. It combines a high-performance C++ backend engine with a Python command-line interface (CLI) and interactive console to deliver fast, lightweight network utilities.
-## Safely 100%
 # Security & Transparency Policy
 
 Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security.
