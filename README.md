@@ -1,6 +1,6 @@
 # VoidCoderStudio.github.io
 
-Netplus is a free open source tool. [Start here](https://demoncoderoffical.github.io) for more info [➔ Go to docs page](https://VoidCoderStudio.github.io/docs) founded and issue [press here](https://VoidCoderStudio.github.io/submit)
+Netplus is a free open source tool. [Start here](https://voidcoderstudio.github.io) for more info [➔ Go to docs page](https://VoidCoderStudio.github.io/docs) founded and issue [press here](https://VoidCoderStudio.github.io/submit)
 
 ## What is NetPlus?
 
