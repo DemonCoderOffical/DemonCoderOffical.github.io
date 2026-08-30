@@ -110,20 +110,16 @@
         </div>
 
         <div id="aboutTab" class="tab-content active">
-            <h2>About NetPlus</h2>
-            <p>NetPlus is an advanced network toolkit designed for terminal enthusiasts and network analysis. It provides interactive menus, scan modes, and local interface diagnostics.</p>
-            
-            <h3>Available Commands & Features:</h3>
+            <h2>What is NetPlus?</h2>
+            <p>
+NetPlus is an ultimate multi-language networking toolkit designed for network analysis, port scanning, and OS fingerprinting. It combines a high-performance C++ backend engine with a Python command-line interface (CLI) and interactive console to deliver fast, lightweight network utilities.</p>
+            <h3>Core Features & Usage:</h3>
             <ul>
-                <li><strong>1 (General Info / About):</strong> Displays tool version and core developer details.</li>
-                <li><strong>2 (SCAN Mode):</strong> Activates the sub-menu for network diagnostics and tools.
-                    <ul>
-                        <li><code>help</code>: Shows scan examples and available options inside scan mode.</li>
-                        <li><code>3</code>: Displays local machine Hostname and Local IP details using socket connections.</li>
-                        <li><code>back</code>: Returns to the main terminal menu.</li>
-                    </ul>
-                </li>
-                <li><strong>exit</strong>: Safely exits the NetPlus application.</li>
+                <li><strong>Port Scanning:</strong> Scans target IPs for common default ports (FTP, SSH, HTTP, HTTPS, SMB, MySQL) or targets specific custom ports via <code>-port.&lt;PORT&gt;</code>.</li>
+                <li><strong>Service & Banner Grabbing:</strong> Identifies open services and pulls server headers directly from open endpoints.</li>
+                <li><strong>OS Fingerprinting:</strong> Executes TTL analysis via ping to determine if the target runs Linux/Unix-like, Windows, or custom network equipment.</li>
+                <li><strong>Firewall Bypass:</strong> Supports the <code>-FLL</code> flag for advanced packet handling, fragmentation, and header spoofing.</li>
+                <li><strong>Interactive Mode:</strong> Launch <code>np</code> without options to open the text-based interactive terminal console.</li>
             </ul>
 
             <h3>Architecture Preview:</h3>
@@ -138,24 +134,26 @@
 
         <div id="installTab" class="tab-content">
             <h2>How to Download & Install NetPlus</h2>
-            <p>Follow these simple steps to get and run NetPlus:</p>
+            <p>Follow these simple steps to set up and run NetPlus:</p>
             
             <ol>
-                <li>Visit the official project page to get the files.</li>
-                <li>Download the package from our main hub.</li>
-                <li>Extract and run the Python script:</li>
+                <li>Clone or download the repository containing the automated setup script.</li>
+                <li>Run the Linux/macOS installation script to compile the C++ engine and configure global symlinks:</li>
             </ol>
 
-            <pre>python netplus.py</pre>
+            <pre>bash downloads/setup.sh</pre>
+
+            <p>Use your global command anywhere in the terminal:</p>
+            <pre>np &lt;IP&gt;</pre>
 
             <p>Get it now from the official page:</p>
-            <a href="https://.github.io" target="_blank" class="download-btn">
-                🔗 Visit DemonCoderOffical.github.io
+            <a href="https://VoidCoderStudio.github.io" target="_blank" class="download-btn">
+                🔗 Visit VoidCoderStudio.github.io
             </a>
         </div>
 
         <div class="bug-section">
-            <p>Found a bug? <a href="https://voidcoderstudio.github.io/submit" class="bug-link">Report it here</a></p>
+            <p>Found a bug? <a href="https://VoidCoderStudio.github.io/submit" class="bug-link">Report it here</a></p>
         </div>
 
         <br>
