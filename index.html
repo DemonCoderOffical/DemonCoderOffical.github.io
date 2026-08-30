@@ -10,8 +10,10 @@
         h1 { margin-bottom: 5px; }
         p { color: #888; margin-bottom: 40px; }
         .download-btn { display: inline-block; background: #121212; color: white; padding: 12px 24px; margin: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .download-btn:hover { background: #0056b3; }
         .disabled { background: #333; color: #666; cursor: not-allowed; }
+        /* Linux button styled with cyan */
+        .linux-btn { background: #00bcd4; color: #121212; }
+        .linux-btn:hover { background: #008ba3; }
         .link-item { color: #00bcd4; text-decoration: none; }
         .link-item:hover { text-decoration: underline; }
         .footer-section { margin-top: 40px; }
@@ -19,14 +21,13 @@
 </head>
 <body>
 
-
     <h1>Download NetPlus</h1>
     <p>Select your platform to get started</p>
 
     <!--Install files-->
-    <a href="#" class="download-btn">Windows(Coming soon) </a>
-    <a href="downloads/setup.sh" class="download-btn disabled">Linux</a>
-    <a href="#" class="download-btn disabled">MacOS (Coming Soon)</a>
+    <div><a href="#" class="download-btn disabled">Windows (Coming soon)</a></div>
+    <div><a href="downloads/setup.sh" class="download-btn linux-btn">Linux</a></div>
+    <div><a href="#" class="download-btn disabled">MacOS (Coming Soon)</a></div>
 
     <div class="footer-section">
         <p>Want to learn more about NetPlus? Go to the <a href="https://VoidCoderStudio.github.io/docs" class="link-item">docs page</a></p>
