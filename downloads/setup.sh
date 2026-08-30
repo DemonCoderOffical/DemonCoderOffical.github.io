@@ -85,11 +85,23 @@ EOF
 
 # 3. Create the main Python script (netplus.py)
 cat << 'EOF' > netplus.py
+
 #!/usr/bin/env python3
 import os
 import sys
 import subprocess
 import platform
+import socket
+
+def resolve_target(target):
+    try:
+        clean_target = target.replace("http://", "").replace("https://", "").split("/")[0]
+        ip_address = socket.gethostbyname(clean_target)
+        print(f"[*] Resolving {clean_target} -> {ip_address}")
+        return ip_address
+    except socket.gaierror:
+        print(f"Error: Invalid IP address or domain please try again\nQUITTING!")
+        sys.exit(1)
 
 def is_valid_ip(ip):
     parts = ip.split('.')
@@ -98,7 +110,7 @@ def is_valid_ip(ip):
     return all(0 <= int(p) <= 255 for p in parts)
 
 def parse_cli_args(args):
-    target = None
+    raw_target = None
     port = None
     firewall_bypass = False
 
@@ -110,16 +122,21 @@ def parse_cli_args(args):
         elif arg.startswith("-port."):
             port_str = arg.split(".")[1]
             if not port_str.isdigit():
-                print("Error: Invaild IP address please try again\nQUITTING!")
+                print("Error: Invalid IP address please try again\nQUITTING!")
                 sys.exit(1)
             port = port_str
-        elif not arg.startswith("-") and target is None:
-            target = arg
+        elif not arg.startswith("-") and raw_target is None:
+            raw_target = arg
         i += 1
 
-    if target and not is_valid_ip(target):
-        print("Error: Invaild IP address please try again\nQUITTING!")
+    if not raw_target:
+        print("Error: Invalid IP address please try again\nQUITTING!")
         sys.exit(1)
+
+    if is_valid_ip(raw_target):
+        target = raw_target
+    else:
+        target = resolve_target(raw_target)
 
     return target, port, firewall_bypass
 
@@ -146,14 +163,14 @@ def detect_os(target):
 def run_cpp_scanner_cli(target, port, firewall_bypass):
     if firewall_bypass:
         print("[*] Firewall Bypass (-FLL) activated: Fragmenting packets / spoofing headers...")
-    
+
     detect_os(target)
-    
+
     scanner_path = "./scripts/scanner"
     if not os.path.exists(scanner_path):
         print("Error: C++ binary not found! Please compile it first.\nQUITTING!")
         return
-    
+
     if port:
         ports_to_scan = [port]
         print(f"\n[+] Running C++ engine on {target}:{port}...")
@@ -183,19 +200,24 @@ def interactive_menu():
         print("2. About NetPlus")
         print("3. Exit")
         print("-" * 45)
-        
+
         choice = input("Select an option (1-3): ").strip()
-        
+
         if choice == '1':
-            ip = input("Enter target IP: ").strip()
-            if not is_valid_ip(ip):
-                print("Error: Invaild IP address please try again\nQUITTING!")
+            raw_ip = input("Enter target IP or Domain (e.g. scanme.nmap.org): ").strip()
+            if not raw_ip:
+                print("Error: Invalid IP address please try again\nQUITTING!")
                 input("\nPress Enter to continue...")
                 continue
             
+            if is_valid_ip(raw_ip):
+                ip = raw_ip
+            else:
+                ip = resolve_target(raw_ip)
+
             port_input = input("Enter target Port (leave empty for default scan): ").strip()
             if port_input and not port_input.isdigit():
-                print("Error: Invaild IP address please try again\nQUITTING!")
+                print("Error: Invalid IP address please try again\nQUITTING!")
                 input("\nPress Enter to continue...")
                 continue
             run_cpp_scanner_cli(ip, port_input if port_input else None, False)
@@ -203,15 +225,15 @@ def interactive_menu():
         elif choice == '2':
             os.system('clear' if os.name == 'posix' else 'cls')
             print("[+] NetPlus: Your ultimate multi-language networking toolkit.")
-            print("[+] CLI Usage: np <IP>")
-            print("[+] CLI Usage with port: np <IP> -port.<PORT>")
-            print("[+] CLI Usage with firewall bypass: np -FLL <IP> -port.<PORT>")
+            print("[+] CLI Usage: np <IP or Domain>")
+            print("[+] CLI Usage with port: np <IP or Domain> -port.<PORT>")
+            print("[+] CLI Usage with firewall bypass: np -FLL <IP or Domain> -port.<PORT>")
             input("\nPress Enter to continue...")
         elif choice == '3':
             print("\nExiting NetPlus. Stay safe, hacker! 🦈")
             sys.exit(0)
         else:
-            print("Error: Invaild IP address please try again\nQUITTING!")
+            print("Error: Invalid IP address please try again\nQUITTING!")
             input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
@@ -220,7 +242,7 @@ if __name__ == "__main__":
         if target:
             run_cpp_scanner_cli(target, port, firewall_bypass)
         else:
-            print("Error: Invaild IP address please try again\nQUITTING!")
+            print("Error: Invalid IP address please try again\nQUITTING!")
     else:
         interactive_menu()
 EOF
