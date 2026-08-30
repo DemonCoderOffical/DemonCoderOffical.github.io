@@ -36,7 +36,7 @@
             color: #00bcd4;
             font-weight: bold;
         }
-        input[type="email"], textarea {
+        input[type="text"], input[type="email"], textarea {
             width: 100%;
             padding: 10px;
             background-color: #000;
@@ -98,11 +98,16 @@
 
     <div class="container">
         <h1>Submit a Bug</h1>
-        <p>Found an issue in our projects? Let me know by filling out the form below. Please add the project name with you email</p>
+        <p>Found an issue in our projects? Let us know by filling out the form below. Please add the project name with your email</p>
         
         <!-- Form targets hidden iframe so page doesn't break, then redirects -->
         <form action="https://formspree.io/f/meeyyjjw" method="POST" target="hidden_iframe" onsubmit="handleSubmit()">
             
+            <div class="form-group">
+                <label for="project_name">Project Name <span style="color: #00bcd4;">*</span>:</label>
+                <input type="text" id="project_name" name="project_name" required placeholder="e.g. NetPlus">
+            </div>
+
             <div class="form-group">
                 <label for="email" id="email-label">Your Email (Optional):</label>
                 <input type="email" id="email" name="email" placeholder="Enter your email address (optional)">
@@ -155,7 +160,7 @@
 
         function handleRedirect() {
             if (isSubmitted) {
-                window.location.href = "https://DemonCoderOffical.github.io/thankyou/index.html";
+                window.location.href = "https://VoidCoderStudio.github.io/thankyou/index.html";
             }
         }
     </script>
