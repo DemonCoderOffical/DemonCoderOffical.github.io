@@ -38,10 +38,13 @@ If you discover a security bug, vulnerability, or a false-positive flag from an 
 
 ## How to Use It
 
-* **CLI Standard Scan:** Run `np <IP>` in your terminal to scan default ports and perform OS detection.
+* **CLI Standard Scan:** Run `np <IP>` in your terminal to scan default ports.
 * **Custom Port Scan:** Run `np <IP> -port.<PORT>` to query a specific port (e.g., `np 192.168.1.1 -port.80`).
 * **Firewall Bypass Scan:** Run `np -FLL <IP> -port.<PORT>` to activate packet fragmentation features.
 * **Interactive Mode:** Run `np` without arguments to launch the interactive text-based console menu.
+Using the Sf option means capturing an pcapng and text for the output
+Using -O means making OS scan.
+
 # Security & Transparency Policy
 
 Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security
