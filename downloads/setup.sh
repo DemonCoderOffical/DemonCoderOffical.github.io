@@ -509,7 +509,6 @@ echo "[+] Compiling C++ scanner engine..."
 g++ scripts/scanner.cpp -o scripts/scanner
 
 # 5. Set permissions and configure 
-pip install paramiko
 symlink for 'np' command
 chmod +x netplus.py
 chmod +x scripts/scanner
