@@ -41,3 +41,7 @@ If you discover a security bug, vulnerability, or a false-positive flag from an 
 # Security & Transparency Policy
 
 Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security.
+<video width="100%" controls>
+  <source src="showcase.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
