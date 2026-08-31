@@ -11,7 +11,7 @@ Thank you for using software from VoidCoderStudio. We prioritize user privacy, d
 
 ## Our Security Commitments
 
-* **No Administrator Privileges Required:** Our software and installation scripts run entirely within user space. We will never ask you to run our code using `sudo` or administrator rights.
+* **No Administrator Privileges Required:** Our software and installation scripts it only requires root for install required apps like g++ for the compiler run entirely within user space. We will never ask you to run our code using `sudo` or administrator rights.
 * **Complete Data Isolation:** Our application directories are fully self-contained. The installation script only creates and modifies files inside its own designated folder and will not touch, modify, or view files elsewhere on your operating system.
 * **Zero Data Collection:** We do not track you, collect metrics, or transmit any user data to external servers. Your data stays entirely on your local machine.
 * **100% Readable Code:** We pledge never to use obfuscation, hidden binaries, or encrypted scripts. Every line of our source code is open, transparent, and easy to audit.
