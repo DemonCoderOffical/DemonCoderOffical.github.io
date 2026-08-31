@@ -116,7 +116,7 @@ EOF
 echo "[+] Compiling C++ scanner engine..."
 c++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner" || g++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner"
 
-# 4. Create full netplus.py script from scratch with path loading support
+# 4. Create full netplus.py script from scratch with fixed dynamic menu indexing
 cat << 'EOF' > "$PROJECT_PATH/netplus.py"
 #!/usr/bin/env python3
 import os
@@ -154,26 +154,37 @@ def resolve_target(target):
         if len(ip_addresses) >= 2:
             print(f"\n{clean_target} resolves into {ip_addresses} what do you want to scan:")
             for idx, ip in enumerate(ip_addresses, 1):
-                print(f"{idx}.{ip}")
-            print("3.Cancel")
-            print("4.All")
+                print(f"{idx}. {ip}")
+            
+            cancel_opt = len(ip_addresses) + 1
+            all_opt = len(ip_addresses) + 2
+            
+            print(f"{cancel_opt}. Cancel")
+            print(f"{all_opt}. All")
 
             choice = input("Select an option: ").strip()
-            if choice == "1":
-                print(f"[*] Selected: {ip_addresses[0]}")
-                return [ip_addresses[0]]
-            elif choice == "2":
-                print(f"[*] Selected: {ip_addresses[1]}")
-                return [ip_addresses[1]]
-            elif choice == "3" or choice.lower() in ["cancel", "3 cancel"]:
+            
+            if choice.isdigit():
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(ip_addresses):
+                    selected_ip = ip_addresses[choice_num - 1]
+                    print(f"[*] Selected: {selected_ip}")
+                    return [selected_ip]
+                elif choice_num == cancel_opt:
+                    print("[-] Operation cancelled by user.\nQUITTING!")
+                    sys.exit(0)
+                elif choice_num == all_opt:
+                    print(f"[*] Selected: All ({', '.join(ip_addresses)})")
+                    return ip_addresses
+            elif choice.lower() in ["cancel"]:
                 print("[-] Operation cancelled by user.\nQUITTING!")
                 sys.exit(0)
-            elif choice == "4" or choice.lower() in ["all", "4.all"]:
+            elif choice.lower() in ["all"]:
                 print(f"[*] Selected: All ({', '.join(ip_addresses)})")
                 return ip_addresses
-            else:
-                print("Error: Invalid selection option please try again\nQUITTING!")
-                sys.exit(1)
+            
+            print("Error: Invalid selection option please try again\nQUITTING!")
+            sys.exit(1)
         elif len(ip_addresses) == 1:
             print(f"[*] Resolving {clean_target} -> {ip_addresses[0]}")
             return [ip_addresses[0]]
@@ -227,7 +238,7 @@ def parse_cli_args(args):
         elif arg == "-LS":
             list_files_flag = True
         elif arg == "-V":
-            print("NetPlus Version 1.8")
+            print("NetPlus Version 1.9")
             sys.exit(0)
         elif arg == "-F":
             if i + 1 < len(args):
@@ -470,3 +481,4 @@ else
     ln -sf "$PROJECT_PATH/netplus.py" ~/.local/bin/np
     echo "[+] NetPlus setup complete! Make sure ~/.local/bin is in your PATH, or run via python3 netplus.py"
 fi
+ 
