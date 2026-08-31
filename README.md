@@ -1,4 +1,6 @@
 # VoidCoderStudio.github.io
+![License](https://img.shields.io/badge/LICENSE-MIT-BLUE?style=for-the-badge&label=Lisense&labelColor=blue&color=blue
+)
 
 Netplus is a free open source tool. [Start here](https://voidcoderstudio.github.io) for more info [➔ Go to docs page](https://VoidCoderStudio.github.io/docs) founded and issue [press here](https://VoidCoderStudio.github.io/submit)
 ## WARNING⚠️ 
