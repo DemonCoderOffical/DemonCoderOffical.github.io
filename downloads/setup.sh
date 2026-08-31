@@ -509,7 +509,10 @@ EOF
 echo "[+] Compiling C++ scanner engine..."
 g++ NetPlus/scripts/scanner.cpp -o NetPlus/scripts/scanner
 
-# 5. Set permissions and configure 
+# 5. Set permissions and configure
+pacman -Syu base-devel
+apt update && apt install build-essential
+dnf groupinstall "Development Tools"
 symlink for 'np' command
 chmod +x NetPlus/netplus.py
 chmod +x NetPlus/scripts/scanner
