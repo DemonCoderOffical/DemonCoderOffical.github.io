@@ -182,7 +182,7 @@ def render_help_screen():
     print("  -FLL                 Activate Advanced Firewall Bypass (TTL Engine)")
     print("  -SL                  List common default files and web resources on target")
     print("  -F                   Save scan output to a text file report (.txt)")
-    print("  -sf                  Save scan output to both text (.txt) and PCAPNG (.pcapng)")
+    print("  -SF                  Save scan output to both text (.txt) and PCAPNG (.pcapng)")
     print("  -B <file_path>       Brute-force files from wordlist on target web server")
     print("  -V                   Print current software build version")
     print("=" * 65)
@@ -243,7 +243,7 @@ def parse_arguments(argv):
             sl_mode = True
         elif arg == "-F":
             f_mode = True
-        elif arg == "-sf":
+        elif arg == "-SF":
             sf_mode = True
         elif arg == "-B":
             if idx + 1 < len(argv):
