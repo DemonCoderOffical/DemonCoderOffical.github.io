@@ -76,16 +76,49 @@ from datetime import datetime
 
 CONFIG_FILE = os.path.expanduser("~/.netplus_path")
 
-def get_project_path():
-    if os.path.exists(CONFIG_FILE):
-        try:
-            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                p = f.read().strip()
-                if p and os.path.exists(p):
-                    return p
-        except Exception:
-            pass
-    return os.path.dirname(os.path.abspath(__file__))
+class Logger:
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "w", encoding="utf-8")
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+    def close_log(self):
+        self.log.close()
+        sys.stdout = self.terminal
+
+def get_scanner_path():
+    # Check global path first (crucial for sudo execution)
+    global_scanner = "/usr/local/bin/scanner"
+    if os.path.exists(global_scanner):
+        return global_scanner
+    
+    # Check project directory
+    local_dir = os.path.dirname(os.path.abspath(__file__))
+    local_scanner = os.path.join(local_dir, "scanner")
+    if os.path.exists(local_scanner):
+        return local_scanner
+        
+    return "scanner"
+
+def check_sudo_disclaimer():
+    if os.geteuid() == 0:
+        disclaimer_text = (
+            "W:Disclaimer: NetPlus is intended for educational purposes, network development, "
+            "and authorized security auditing only. The developers are not responsible for any "
+            "illegal use, unauthorized access, or damages caused by the misuse of this tool. "
+            "You are solely responsible for complying with local laws and applying this tool "
+            "exclusively to systems and networks that you own or have explicit authorization to test "
+            "using it will sudo means you will scan out of your network devices do you have permission "
+            "for the device that you will scan\n[y/n]: "
+        )
+        choice = input(disclaimer_text).strip().lower()
+        if choice != 'y':
+            print("[-] Operation aborted by user.\nQUITTING!")
+            sys.exit(0)
 
 def resolve_target(target):
     clean_target = target.replace("http://", "").replace("https://", "").split("/")[0]
@@ -160,6 +193,7 @@ def display_help_menu():
     print("  -F <file_path>       Load a paths/passwords file for directory testing.")
     print("  -LS                  Ask the web server for all files and list them.")
     print("  -FLL                 Activate firewall bypass (packet fragmentation)")
+    print("  -Sf                  Save output to TXT and capture traffic to PCAPNG")
     print("  -V                   Shows NetPlus Current version.")
     print("=" * 65)
 
@@ -175,6 +209,7 @@ def parse_cli_args(args):
     password_file = None
     list_files_flag = False
     os_detection_flag = False
+    save_file_flag = False
 
     i = 0
     while i < len(args):
@@ -185,6 +220,8 @@ def parse_cli_args(args):
             list_files_flag = True
         elif arg == "-O":
             os_detection_flag = True
+        elif arg == "-Sf":
+            save_file_flag = True
         elif arg == "-V":
             print("NetPlus Version 1.9")
             sys.exit(0)
@@ -238,7 +275,7 @@ def parse_cli_args(args):
         sys.exit(1)
 
     targets = resolve_target(raw_target)
-    return targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, raw_target
+    return targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, raw_target
 
 def perform_netplus_os_fingerprint(target, open_ports):
     print(f"\n[*] Running NetPlus Native OS Fingerprint Engine for {target}...")
@@ -323,81 +360,121 @@ def query_web_files(target_ip, port, firewall_bypass, original_target):
     except Exception:
         print("Note: We have been blocked from the server try -FLL to skip the firewall")
 
-def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target):
-    project_path = get_project_path()
-    scanner_binary = "scanner.exe" if platform.system().lower() == "windows" else "scanner"
-    scanner_path = os.path.join(project_path, scanner_binary)
+def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, original_target):
+    scanner_path = get_scanner_path()
     if not os.path.exists(scanner_path):
-        print(f"Error: C++ core engine binary not found at '{scanner_path}'!\nQUITTING!")
+        print(f"Error: C++ core engine binary not found at '{scanner_path}'!")
+        print("[-] Please copy 'scanner' binary to /usr/local/bin/ to work properly with sudo.")
+        print("    Run: sudo cp scanner /usr/local/bin/\nQUITTING!")
         return
 
-    ports_to_scan = ports if ports else ["21", "22", "80", "443", "445", "3306", "8080"]
-    delay = 1.0 / scans_per_second if scans_per_second else 0
+    logger = None
+    capture_proc = None
+    pcap_filename = ""
+    txt_filename = ""
 
-    start_time = time.time()
-    open_ports_found = []
-    numeric_open_ports = []
-    
-    for idx, p in enumerate(ports_to_scan):
-        if delay > 0 and idx > 0:
-            time.sleep(delay)
+    if save_file_flag:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        txt_filename = f"netplus_{target}_{timestamp}.txt"
+        pcap_filename = f"netplus_{target}_{timestamp}.pcapng"
+        
+        logger = Logger(txt_filename)
+        sys.stdout = logger
+        print(f"[*] Saving text output to -> {txt_filename}")
+        print(f"[*] Starting background packet capture to -> {pcap_filename}")
+        
         try:
-            result = subprocess.run([scanner_path, target, p], capture_output=True, text=True, check=True)
-            output = result.stdout.strip()
-            print(output)
-            if "OPEN" in output:
-                open_ports_found.append(p)
-                numeric_open_ports.append(int(p))
-        except subprocess.CalledProcessError:
-            pass
+            capture_proc = subprocess.Popen(
+                ["tshark", "-f", f"host {target}", "-w", pcap_filename], 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
+        except FileNotFoundError:
+            print("[-] Warning: 'tshark' not found on the system. PCAPNG capture will be skipped.")
+            print("    (To install it on Arch: sudo pacman -S wireshark-cli)")
 
-    if os_detection_flag:
-        perform_netplus_os_fingerprint(target, numeric_open_ports)
+    try:
+        ports_to_scan = ports if ports else ["21", "22", "80", "443", "445", "3306", "8080"]
+        delay = 1.0 / scans_per_second if scans_per_second else 0
 
-    if list_files_flag and open_ports_found:
-        for p in open_ports_found:
-            if p in ["80", "443", "8080", "8443"]:
-                query_web_files(target, p, firewall_bypass, original_target)
+        start_time = time.time()
+        open_ports_found = []
+        numeric_open_ports = []
+        
+        for idx, p in enumerate(ports_to_scan):
+            if delay > 0 and idx > 0:
+                time.sleep(delay)
+            try:
+                result = subprocess.run([scanner_path, target, p], capture_output=True, text=True, check=True)
+                output = result.stdout.strip()
+                print(output)
+                if "OPEN" in output:
+                    open_ports_found.append(p)
+                    numeric_open_ports.append(int(p))
+            except subprocess.CalledProcessError:
+                pass
 
-    if password_file and open_ports_found:
-        try:
-            with open(password_file, "r", encoding="utf-8", errors="ignore") as f:
-                passwords = [line.strip() for line in f if line.strip()]
-        except Exception as e:
-            print(f"[-] Error reading wordlist file: {e}")
-            return
+        if os_detection_flag:
+            perform_netplus_os_fingerprint(target, numeric_open_ports)
 
-        for target_port in open_ports_found:
-            if target_port == "80":
-                print(f"\n[*] Launching Active Web Path Discovery on port {target_port}...")
-                for path in passwords:
-                    if delay > 0:
-                        time.sleep(delay)
-                    clean_path = path.lstrip('/')
-                    url = f"http://{target}:{target_port}/{clean_path}"
-                    try:
-                        req = urllib.request.Request(url, headers={'User-Agent': 'NetPlus Toolkit/1.0'})
-                        with urllib.request.urlopen(req, timeout=3) as response:
-                            if response.status == 200:
-                                print(f"    [+] FOUND ACCESSIBLE PATH: /{clean_path} (Status: 200 OK)")
-                    except Exception:
-                        pass
+        if list_files_flag and open_ports_found:
+            for p in open_ports_found:
+                if p in ["80", "443", "8080", "8443"]:
+                    query_web_files(target, p, firewall_bypass, original_target)
 
-    elapsed_time = time.time() - start_time
-    print("\n" + "=" * 45)
-    print("                    NETPLUS RUN SUMMARY                    ")
-    print("=" * 45)
-    print(f"[+] Total Targets Checked : 1 ({target})")
-    print(f"[+] Operational Ports Checked : {len(ports_to_scan)}")
-    print(f"[+] Open Services Discovered  : {len(open_ports_found)}")
-    if open_ports_found:
-        print(f"[+] Identified Ports List     : {', '.join(open_ports_found)}")
-    print(f"[+] Elapsed Engine Run-time   : {elapsed_time:.2f} seconds")
-    print("=" * 45)
+        if password_file and open_ports_found:
+            try:
+                with open(password_file, "r", encoding="utf-8", errors="ignore") as f:
+                    passwords = [line.strip() for line in f if line.strip()]
+            except Exception as e:
+                print(f"[-] Error reading wordlist file: {e}")
+                return
 
-def run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target):
+            for target_port in open_ports_found:
+                if target_port == "80":
+                    print(f"\n[*] Launching Active Web Path Discovery on port {target_port}...")
+                    for path in passwords:
+                        if delay > 0:
+                            time.sleep(delay)
+                        clean_path = path.lstrip('/')
+                        url = f"http://{target}:{target_port}/{clean_path}"
+                        try:
+                            req = urllib.request.Request(url, headers={'User-Agent': 'NetPlus Toolkit/1.0'})
+                            with urllib.request.urlopen(req, timeout=3) as response:
+                                if response.status == 200:
+                                    print(f"    [+] FOUND ACCESSIBLE PATH: /{clean_path} (Status: 200 OK)")
+                        except Exception:
+                            pass
+
+        elapsed_time = time.time() - start_time
+        print("\n" + "=" * 45)
+        print("                    NETPLUS RUN SUMMARY                    ")
+        print("=" * 45)
+        print(f"[+] Total Targets Checked : 1 ({target})")
+        print(f"[+] Operational Ports Checked : {len(ports_to_scan)}")
+        print(f"[+] Open Services Discovered  : {len(open_ports_found)}")
+        if open_ports_found:
+            print(f"[+] Identified Ports List     : {', '.join(open_ports_found)}")
+        print(f"[+] Elapsed Engine Run-time   : {elapsed_time:.2f} seconds")
+        print("=" * 45)
+
+    finally:
+        if capture_proc:
+            capture_proc.terminate()
+            try:
+                outs, errs = capture_proc.communicate(timeout=2)
+                if errs:
+                    print(f"[-] Tshark Error Output: {errs.decode('utf-8', errors='ignore')}")
+            except Exception:
+                pass
+            print(f"[*] PCAPNG packet capture safely stored to {pcap_filename}")
+        
+        if logger:
+            logger.close_log()
+
+def run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, original_target):
     for target in targets:
-        run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target)
+        run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, original_target)
 
 def interactive_menu():
     while True:
@@ -417,17 +494,18 @@ def interactive_menu():
             port_input = input("Enter target Port (Supports single, ranges, or empty for defaults): ").strip()
             use_ls = input("Do you want to query server files using -LS? (y/n): ").strip().lower() == 'y'
             use_os = input("Do you want to run OS detection using -O? (y/n): ").strip().lower() == 'y'
+            use_sf = input("Do you want to save text output and PCAPNG capture using -Sf? (y/n): ").strip().lower() == 'y'
 
             ports_list = []
             if port_input:
                 if "," in port_input or "-" in port_input:
                     fake_args = [f"-port.{port_input}"]
-                    _, parsed_ports, _, _, _, _, _, _ = parse_cli_args([targets[0]] + fake_args)
+                    _, parsed_ports, _, _, _, _, _, _, _ = parse_cli_args([targets[0]] + fake_args)
                     ports_list = parsed_ports
                 elif port_input.isdigit():
                     ports_list = [port_input]
 
-            run_cpp_scanner_cli(targets, ports_list, False, None, None, use_ls, use_os, raw_ip)
+            run_cpp_scanner_cli(targets, ports_list, False, None, None, use_ls, use_os, use_sf, raw_ip)
             input("\nPress Enter to continue...")
         elif choice == '2':
             display_help_menu()
@@ -436,16 +514,17 @@ def interactive_menu():
             sys.exit(0)
 
 if __name__ == "__main__":
+    check_sudo_disclaimer()
     if len(sys.argv) > 1:
-        targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target = parse_cli_args(sys.argv[1:])
+        targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, original_target = parse_cli_args(sys.argv[1:])
         if targets:
-            run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target)
+            run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, save_file_flag, original_target)
     else:
         interactive_menu()
 EOF
 echo "[+] Created netplus.py successfully."
 
-# 3. Compile C++ Core
+# 3. Compile C++ Core and Copy globally for sudo support
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "$CURRENT_DIR" > ~/.netplus_path
 
@@ -453,6 +532,16 @@ echo "[*] Compiling C++ scanner core..."
 g++ -O3 "$CURRENT_DIR/scanner.cpp" -o "$CURRENT_DIR/scanner"
 if [ $? -eq 0 ]; then
     echo "[+] Compiled successfully -> scanner"
+    
+    # Copy scanner to /usr/local/bin to make it available for sudo
+    echo "[*] Installing scanner globally for sudo execution..."
+    sudo cp "$CURRENT_DIR/scanner" /usr/local/bin/scanner
+    sudo chmod +x /usr/local/bin/scanner
+    if [ $? -eq 0 ]; then
+        echo "[+] Scanner successfully copied to /usr/local/bin/scanner"
+    else
+        echo "[-] Warning: Could not copy scanner to /usr/local/bin. You may need to do it manually: sudo cp scanner /usr/local/bin/"
+    fi
 else
     echo "[-] C++ compilation failed!"
     exit 1
@@ -460,9 +549,9 @@ fi
 
 chmod +x "$CURRENT_DIR/netplus.py"
 
-# 4. Link np command
+# 4. Link np command globally
 if [ -w "/usr/local/bin" ]; then
-    ln -sf "$CURRENT_DIR/netplus.py" "/usr/local/bin/np"
+    sudo ln -sf "$CURRENT_DIR/netplus.py" "/usr/local/bin/np"
     echo "[+] Installed globally as 'np' in /usr/local/bin/np"
 elif [ -d "$HOME/.local/bin" ]; then
     ln -sf "$CURRENT_DIR/netplus.py" "$HOME/.local/bin/np"
@@ -479,3 +568,4 @@ echo "============================================="
 echo "       SETUP COMPLETED SUCCESSFULLY          "
 echo "============================================="
 echo "Run tool using: np <target> [options]"
+echo "Or with sudo:   sudo np <target> [options]"
