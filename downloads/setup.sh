@@ -1,123 +1,68 @@
 #!/bin/bash
 
-echo "============================================="
-echo "    NETPLUS FROM-SCRATCH SETUP & BUILDER     "
-echo "============================================="
+# NetPlus All-in-One Setup & Code Generation Script
 
-read -p "Enter the directory path where you want to build NetPlus (leave blank for current dir): " USER_PATH
+echo "[*] Generating NetPlus core files from scratch..."
 
-if [ -z "$USER_PATH" ]; then
-    PROJECT_PATH="$(pwd)"
-else
-    eval PROJECT_PATH="$USER_PATH"
-fi
-
-mkdir -p "$PROJECT_PATH/scripts"
-mkdir -p ~/.local/bin
-
-if [ -n "$PREFIX" ]; then
-    mkdir -p "$PREFIX/bin"
-fi
-
-# Save path globally so netplus can run from anywhere
-echo "$PROJECT_PATH" > ~/.netplus_path
-echo "[+] Project path saved to ~/.netplus_path: $PROJECT_PATH"
-
-# 1. Detect environment and install packages without root if possible
-if [ -n "$PREFIX" ] && echo "$PREFIX" | grep -q "termux"; then
-    echo "[*] Detected Termux environment..."
-    pkg update -y && pkg install -y build-essential python
-elif command -v apt-get &> /dev/null && [ "$EUID" -eq 0 ]; then
-    apt-get update -y && apt-get install -y build-essential python3
-elif command -v pacman &> /dev/null && [ "$EUID" -eq 0 ]; then
-    pacman -Syu --noconfirm base-devel python3
-else
-    echo "[*] Skipping system package installation or assuming dependencies (clang/g++, python3) are present."
-fi
-
-# 2. Create scanner.cpp from scratch
-cat << 'EOF' > "$PROJECT_PATH/scripts/scanner.cpp"
+# 1. Create scanner.cpp (C++ Network Core)
+cat << 'EOF' > scanner.cpp
 #include <iostream>
+#include <string>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <cstring>
 #include <netdb.h>
+#include <chrono>
 
-using namespace std;
-
-void check_port(string ip, int port) {
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        cout << "[-] Socket creation failed\n";
-        return;
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: scanner <ip> <port>\n";
+        return 1;
     }
 
-    struct sockaddr_in serv_addr;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr);
+    std::string target = argv[1];
+    int port = std::stoi(argv[2]);
+
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return 1;
+    }
 
     struct timeval timeout;
-    timeout.tv_sec = 2;
+    timeout.tv_sec = 1;
     timeout.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout, sizeof(timeout));
 
-    int result = connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    struct sockaddr_in serv_addr;
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
 
-    if (result == 0) {
-        string service = "unknown";
-        if (port == 21) service = "ftp";
-        else if (port == 22) service = "ssh";
-        else if (port == 80 || port == 8080 || port == 443) service = "http";
-        else if (port == 3306) service = "mysql";
-        else if (port == 445) service = "smb";
-
-        cout << "[+] Port " << port << " is OPEN | Service: " << service;
-
-        if (port == 80 || port == 8080) {
-            string request = "GET / HTTP/1.1\r\nHost: " + ip + "\r\nConnection: close\r\n\r\n";
-            send(sock, request.c_str(), request.length(), 0);
-        }
-
-        char buffer[1024];
-        memset(buffer, 0, sizeof(buffer));
-        int bytes_received = recv(sock, buffer, sizeof(buffer) - 1, 0);
-        if (bytes_received > 0) {
-            string banner(buffer);
-            if (banner.find("Server:") != string::npos) {
-                size_t start = banner.find("Server:");
-                size_t end = banner.find("\r\n", start);
-                string server_info = banner.substr(start, end - start);
-                cout << " | " << server_info;
-            } else {
-                cout << " | Banner: " << banner.substr(0, 40);
-            }
-        }
-        cout << "\n";
-    } else {
-        cout << "[-] Port " << port << " is CLOSED\n";
-    }
-    close(sock);
-}
-
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        cout << "Usage: ./scanner <IP> <PORT>\n";
+    if (inet_pton(AF_INET, target.c_str(), &serv_addr.sin_addr) <= 0) {
+        close(sock);
         return 1;
     }
-    check_port(argv[1], stoi(argv[2]));
-    return 0;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    int res = connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+
+    if (res == 0) {
+        std::cout << "[+] Port " << port << " is OPEN (" << elapsed.count() << "ms)" << std::endl;
+        close(sock);
+        return 0;
+    } else {
+        std::cout << "[-] Port " << port << " is CLOSED" << std::endl;
+        close(sock);
+        return 1;
+    }
 }
 EOF
+echo "[+] Created scanner.cpp successfully."
 
-# 3. Compile C++ engine using c++ / g++
-echo "[+] Compiling C++ scanner engine..."
-c++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner" || g++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner"
-
-# 4. Create full netplus.py script from scratch with fixed dynamic menu indexing
-cat << 'EOF' > "$PROJECT_PATH/netplus.py"
+# 2. Create netplus.py (Python Toolkit Frontend & CLI)
+cat << 'EOF' > netplus.py
 #!/usr/bin/env python3
 import os
 import sys
@@ -127,7 +72,7 @@ import socket
 import time
 import ssl
 import urllib.request
-from urllib.error import HTTPError, URLError
+from datetime import datetime
 
 CONFIG_FILE = os.path.expanduser("~/.netplus_path")
 
@@ -186,7 +131,6 @@ def resolve_target(target):
             print("Error: Invalid selection option please try again\nQUITTING!")
             sys.exit(1)
         elif len(ip_addresses) == 1:
-            print(f"[*] Resolving {clean_target} -> {ip_addresses[0]}")
             return [ip_addresses[0]]
         else:
             print(f"Error: Could not resolve {clean_target}\nQUITTING!")
@@ -210,6 +154,7 @@ def display_help_menu():
     print("  <target>             IP address or Domain name (e.g., scanme.nmap.org)")
     print("\nOPTIONS:")
     print("  -h, --help           Show this comprehensive help screen")
+    print("  -O                   Perform Native NetPlus OS Fingerprinting")
     print("  -port.<ports>        Specify port targets. Supports commas and ranges.")
     print("  -SL.<rate>           Scan Limit / Pacing rate (scans per second).")
     print("  -F <file_path>       Load a paths/passwords file for directory testing.")
@@ -229,6 +174,7 @@ def parse_cli_args(args):
     scans_per_second = None
     password_file = None
     list_files_flag = False
+    os_detection_flag = False
 
     i = 0
     while i < len(args):
@@ -237,6 +183,8 @@ def parse_cli_args(args):
             firewall_bypass = True
         elif arg == "-LS":
             list_files_flag = True
+        elif arg == "-O":
+            os_detection_flag = True
         elif arg == "-V":
             print("NetPlus Version 1.9")
             sys.exit(0)
@@ -290,30 +238,54 @@ def parse_cli_args(args):
         sys.exit(1)
 
     targets = resolve_target(raw_target)
-    return targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, raw_target
+    return targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, raw_target
 
-def detect_os(target):
-    print(f"\n[*] Running Advanced OS Fingerprinting & TTL Hop Analysis for {target}...")
-    param = "-n" if platform.system().lower() == "windows" else "-c"
+def perform_netplus_os_fingerprint(target, open_ports):
+    print(f"\n[*] Running NetPlus Native OS Fingerprint Engine for {target}...")
+    
+    hostname = "Unknown"
     try:
-        output = subprocess.check_output(["ping", param, "1", target], stderr=subprocess.STDOUT, text=True)
-        if "ttl=" in output.lower():
-            for word in output.split():
-                if word.lower().startswith("ttl="):
-                    ttl_val = int(word.split("=")[1])
-                    if ttl_val <= 64:
-                        os_family = "Linux / Android / Unix-like"
-                    elif ttl_val <= 128:
-                        os_family = "Windows"
-                    else:
-                        os_family = "Cisco Router / Network Device / Unix BSD"
-                    print(f"[+] Target OS Fingerprint : {os_family} (TTL: {ttl_val})")
-                    return True
-        print(f"[-] Host {target} is unreachable")
-        return False
+        host_info = socket.gethostbyaddr(target)
+        hostname = host_info[0]
+        print(f"[+] Target Hostname Resolved   : {hostname}")
     except Exception:
-        print(f"[-] Host {target} is unreachable")
-        return False
+        print(f"[*] Reverse DNS Hostname lookup : Not resolved / Direct IP")
+
+    detected_os = "Generic Unix-like / Linux System"
+    confidence = "Medium"
+    h_lower = hostname.lower()
+
+    if "arch" in h_lower:
+        detected_os = "Arch Linux (Rolling Release)"
+        confidence = "High"
+    elif "honor" in h_lower:
+        detected_os = "Honor Mobile Device (MagicOS / Android Architecture)"
+        confidence = "High"
+    elif "samsung" in h_lower or "galaxy" in h_lower:
+        detected_os = "Samsung Galaxy Device (One UI / Android Architecture)"
+        confidence = "High"
+    elif "ubuntu" in h_lower:
+        detected_os = "Ubuntu Linux Distribution"
+        confidence = "High"
+    elif "debian" in h_lower:
+        detected_os = "Debian GNU/Linux"
+        confidence = "High"
+    elif "windows" in h_lower or "desktop" in h_lower:
+        detected_os = "Microsoft Windows Environment"
+        confidence = "Medium"
+    else:
+        if 445 in open_ports or 139 in open_ports:
+            detected_os = "Microsoft Windows (SMB Active)"
+            confidence = "High"
+        elif 22 in open_ports:
+            detected_os = "Linux Server / Unix-like (SSH Active)"
+            confidence = "Medium"
+        else:
+            detected_os = "Standard Linux Kernel / Network Host"
+            confidence = "Standard"
+
+    print(f"[+] Target OS Fingerprint Result : {detected_os}")
+    print(f"[+] Fingerprint Confidence Level: {confidence}\n")
 
 def query_web_files(target_ip, port, firewall_bypass, original_target):
     print(f"\n[*] Asking web server at {target_ip}:{port} ('hi what all files you have')...")
@@ -351,24 +323,21 @@ def query_web_files(target_ip, port, firewall_bypass, original_target):
     except Exception:
         print("Note: We have been blocked from the server try -FLL to skip the firewall")
 
-def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, original_target):
-    if not detect_os(target):
-        return
-
+def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target):
     project_path = get_project_path()
     scanner_binary = "scanner.exe" if platform.system().lower() == "windows" else "scanner"
-    scanner_path = os.path.join(project_path, "scripts", scanner_binary)
+    scanner_path = os.path.join(project_path, scanner_binary)
     if not os.path.exists(scanner_path):
-        scanner_path = os.path.join(project_path, scanner_binary)
-        if not os.path.exists(scanner_path):
-            print(f"Error: C++ core engine binary not found at '{scanner_path}'!\nQUITTING!")
-            return
+        print(f"Error: C++ core engine binary not found at '{scanner_path}'!\nQUITTING!")
+        return
 
     ports_to_scan = ports if ports else ["21", "22", "80", "443", "445", "3306", "8080"]
     delay = 1.0 / scans_per_second if scans_per_second else 0
 
     start_time = time.time()
     open_ports_found = []
+    numeric_open_ports = []
+    
     for idx, p in enumerate(ports_to_scan):
         if delay > 0 and idx > 0:
             time.sleep(delay)
@@ -378,8 +347,12 @@ def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, pas
             print(output)
             if "OPEN" in output:
                 open_ports_found.append(p)
+                numeric_open_ports.append(int(p))
         except subprocess.CalledProcessError:
             pass
+
+    if os_detection_flag:
+        perform_netplus_os_fingerprint(target, numeric_open_ports)
 
     if list_files_flag and open_ports_found:
         for p in open_ports_found:
@@ -422,9 +395,9 @@ def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, pas
     print(f"[+] Elapsed Engine Run-time   : {elapsed_time:.2f} seconds")
     print("=" * 45)
 
-def run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, original_target):
+def run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target):
     for target in targets:
-        run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, original_target)
+        run_single_target_scan(target, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target)
 
 def interactive_menu():
     while True:
@@ -443,17 +416,18 @@ def interactive_menu():
             targets = resolve_target(raw_ip)
             port_input = input("Enter target Port (Supports single, ranges, or empty for defaults): ").strip()
             use_ls = input("Do you want to query server files using -LS? (y/n): ").strip().lower() == 'y'
+            use_os = input("Do you want to run OS detection using -O? (y/n): ").strip().lower() == 'y'
 
             ports_list = []
             if port_input:
                 if "," in port_input or "-" in port_input:
                     fake_args = [f"-port.{port_input}"]
-                    _, parsed_ports, _, _, _, _, _ = parse_cli_args([targets[0]] + fake_args)
+                    _, parsed_ports, _, _, _, _, _, _ = parse_cli_args([targets[0]] + fake_args)
                     ports_list = parsed_ports
                 elif port_input.isdigit():
                     ports_list = [port_input]
 
-            run_cpp_scanner_cli(targets, ports_list, False, None, None, use_ls, raw_ip)
+            run_cpp_scanner_cli(targets, ports_list, False, None, None, use_ls, use_os, raw_ip)
             input("\nPress Enter to continue...")
         elif choice == '2':
             display_help_menu()
@@ -463,22 +437,45 @@ def interactive_menu():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, original_target = parse_cli_args(sys.argv[1:])
+        targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target = parse_cli_args(sys.argv[1:])
         if targets:
-            run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, original_target)
+            run_cpp_scanner_cli(targets, ports, firewall_bypass, scans_per_second, password_file, list_files_flag, os_detection_flag, original_target)
     else:
         interactive_menu()
 EOF
+echo "[+] Created netplus.py successfully."
 
-# 5. Make executable and link to user-writable bin path
-chmod +x "$PROJECT_PATH/netplus.py"
-chmod +x "$PROJECT_PATH/scripts/scanner"
+# 3. Compile C++ Core
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "$CURRENT_DIR" > ~/.netplus_path
 
-if [ -n "$PREFIX" ]; then
-    ln -sf "$PROJECT_PATH/netplus.py" "$PREFIX/bin/np"
-    echo "[+] NetPlus setup complete! Installed globally inside Termux as 'np'."
+echo "[*] Compiling C++ scanner core..."
+g++ -O3 "$CURRENT_DIR/scanner.cpp" -o "$CURRENT_DIR/scanner"
+if [ $? -eq 0 ]; then
+    echo "[+] Compiled successfully -> scanner"
 else
-    ln -sf "$PROJECT_PATH/netplus.py" ~/.local/bin/np
-    echo "[+] NetPlus setup complete! Make sure ~/.local/bin is in your PATH, or run via python3 netplus.py"
+    echo "[-] C++ compilation failed!"
+    exit 1
 fi
- 
+
+chmod +x "$CURRENT_DIR/netplus.py"
+
+# 4. Link np command
+if [ -w "/usr/local/bin" ]; then
+    ln -sf "$CURRENT_DIR/netplus.py" "/usr/local/bin/np"
+    echo "[+] Installed globally as 'np' in /usr/local/bin/np"
+elif [ -d "$HOME/.local/bin" ]; then
+    ln -sf "$CURRENT_DIR/netplus.py" "$HOME/.local/bin/np"
+    echo "[+] Installed locally as 'np' in ~/.local/bin/np"
+else
+    ALIAS_CMD="alias np='python3 $CURRENT_DIR/netplus.py'"
+    [ -f "$HOME/.bashrc" ] && grep -q "alias np=" "$HOME/.bashrc" || echo "$ALIAS_CMD" >> "$HOME/.bashrc"
+    [ -f "$HOME/.zshrc" ] && grep -q "alias np=" "$HOME/.zshrc" || echo "$ALIAS_CMD" >> "$HOME/.zshrc"
+    echo "[+] Added 'np' alias to your shell configuration."
+fi
+
+echo ""
+echo "============================================="
+echo "       SETUP COMPLETED SUCCESSFULLY          "
+echo "============================================="
+echo "Run tool using: np <target> [options]"
