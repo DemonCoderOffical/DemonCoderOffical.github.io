@@ -1,6 +1,9 @@
 # VoidCoderStudio.github.io
 
 Netplus is a free open source tool. [Start here](https://voidcoderstudio.github.io) for more info [➔ Go to docs page](https://VoidCoderStudio.github.io/docs) founded and issue [press here](https://VoidCoderStudio.github.io/submit)
+## WARNING⚠️ 
+Disclaimer:
+NetPlus is intended for educational purposes, network development, and authorized security auditing only. The developers are not responsible for any illegal use, unauthorized access, or damages caused by the misuse of this tool. You are solely responsible for complying with local laws and applying this tool exclusively to systems and networks that you own or have explicit authorization to test.
 
 ## What is NetPlus?
 
