@@ -3,11 +3,12 @@
 echo "[+] Setting up NetPlus Toolkit from scratch..."
 
 # 1. Create necessary directories
-mkdir -p scripts
+mkdir -p NetPlus
+mkdir -p NetPlus/scripts
 mkdir -p ~/.local/bin
 
 # 2. Create the C++ scanner engine (scanner.cpp)
-cat << 'EOF' > scripts/scanner.cpp
+cat << 'EOF' > NetPlus/scripts/scanner.cpp
 #include <iostream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -84,7 +85,7 @@ int main(int argc, char* argv[]) {
 EOF
 
 # 3. Create the main Python script (netplus.py)
-cat << 'EOF' > netplus.py
+cat << 'EOF' > NetPlus/netplus.py
 #!/usr/bin/env python3
 import os
 import sys
@@ -510,8 +511,8 @@ g++ scripts/scanner.cpp -o scripts/scanner
 
 # 5. Set permissions and configure 
 symlink for 'np' command
-chmod +x netplus.py
-chmod +x scripts/scanner
-ln -sf "$(pwd)/netplus.py" ~/.local/bin/np
+chmod +x NetPlus/netplus.py
+chmod +x NetPlus/scripts/scanner
+ln -sf "$(pwd)/NetPlus/netplus.py" ~/.local/bin/np
 
 echo "[+] NetPlus setup complete successfully! You can now use 'np' globally."
