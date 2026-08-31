@@ -507,7 +507,7 @@ EOF
 
 # 4. Compile C++ binary
 echo "[+] Compiling C++ scanner engine..."
-g++ scripts/scanner.cpp -o scripts/scanner
+g++ NetPlus/scripts/scanner.cpp -o NetPlus/scripts/scanner
 
 # 5. Set permissions and configure 
 symlink for 'np' command
