@@ -1,6 +1,27 @@
 #!/bin/bash
 
-echo "[+] Setting up NetPlus Toolkit in rootless mode (Termux & Linux compatible)..."
+echo "============================================="
+echo "    NETPLUS FROM-SCRATCH SETUP & BUILDER     "
+echo "============================================="
+
+read -p "Enter the directory path where you want to build NetPlus (leave blank for current dir): " USER_PATH
+
+if [ -z "$USER_PATH" ]; then
+    PROJECT_PATH="$(pwd)"
+else
+    eval PROJECT_PATH="$USER_PATH"
+fi
+
+mkdir -p "$PROJECT_PATH/scripts"
+mkdir -p ~/.local/bin
+
+if [ -n "$PREFIX" ]; then
+    mkdir -p "$PREFIX/bin"
+fi
+
+# Save path globally so netplus can run from anywhere
+echo "$PROJECT_PATH" > ~/.netplus_path
+echo "[+] Project path saved to ~/.netplus_path: $PROJECT_PATH"
 
 # 1. Detect environment and install packages without root if possible
 if [ -n "$PREFIX" ] && echo "$PREFIX" | grep -q "termux"; then
@@ -14,16 +35,8 @@ else
     echo "[*] Skipping system package installation or assuming dependencies (clang/g++, python3) are present."
 fi
 
-# 2. Create required directories
-mkdir -p scripts
-mkdir -p ~/.local/bin
-
-if [ -n "$PREFIX" ]; then
-    mkdir -p "$PREFIX/bin"
-fi
-
-# 3. Create scanner.cpp
-cat << 'EOF' > scripts/scanner.cpp
+# 2. Create scanner.cpp from scratch
+cat << 'EOF' > "$PROJECT_PATH/scripts/scanner.cpp"
 #include <iostream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -99,8 +112,12 @@ int main(int argc, char* argv[]) {
 }
 EOF
 
-# 4. Create full netplus.py script
-cat << 'EOF' > netplus.py
+# 3. Compile C++ engine using c++ / g++
+echo "[+] Compiling C++ scanner engine..."
+c++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner" || g++ -O3 "$PROJECT_PATH/scripts/scanner.cpp" -o "$PROJECT_PATH/scripts/scanner"
+
+# 4. Create full netplus.py script from scratch with path loading support
+cat << 'EOF' > "$PROJECT_PATH/netplus.py"
 #!/usr/bin/env python3
 import os
 import sys
@@ -111,6 +128,19 @@ import time
 import ssl
 import urllib.request
 from urllib.error import HTTPError, URLError
+
+CONFIG_FILE = os.path.expanduser("~/.netplus_path")
+
+def get_project_path():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                p = f.read().strip()
+                if p and os.path.exists(p):
+                    return p
+        except Exception:
+            pass
+    return os.path.dirname(os.path.abspath(__file__))
 
 def resolve_target(target):
     clean_target = target.replace("http://", "").replace("https://", "").split("/")[0]
@@ -314,10 +344,14 @@ def run_single_target_scan(target, ports, firewall_bypass, scans_per_second, pas
     if not detect_os(target):
         return
 
-    scanner_path = "./scripts/scanner"
+    project_path = get_project_path()
+    scanner_binary = "scanner.exe" if platform.system().lower() == "windows" else "scanner"
+    scanner_path = os.path.join(project_path, "scripts", scanner_binary)
     if not os.path.exists(scanner_path):
-        print("Error: C++ core engine binary not found!\nQUITTING!")
-        return
+        scanner_path = os.path.join(project_path, scanner_binary)
+        if not os.path.exists(scanner_path):
+            print(f"Error: C++ core engine binary not found at '{scanner_path}'!\nQUITTING!")
+            return
 
     ports_to_scan = ports if ports else ["21", "22", "80", "443", "445", "3306", "8080"]
     delay = 1.0 / scans_per_second if scans_per_second else 0
@@ -425,18 +459,14 @@ if __name__ == "__main__":
         interactive_menu()
 EOF
 
-# 5. Compile C++ engine using c++ / g++
-echo "[+] Compiling C++ scanner engine..."
-c++ -O3 scripts/scanner.cpp -o scripts/scanner || g++ -O3 scripts/scanner.cpp -o scripts/scanner
-
-# 6. Make executable and link to user-writable bin path
-chmod +x netplus.py
-chmod +x scripts/scanner
+# 5. Make executable and link to user-writable bin path
+chmod +x "$PROJECT_PATH/netplus.py"
+chmod +x "$PROJECT_PATH/scripts/scanner"
 
 if [ -n "$PREFIX" ]; then
-    ln -sf "$(pwd)/netplus.py" "$PREFIX/bin/np"
+    ln -sf "$PROJECT_PATH/netplus.py" "$PREFIX/bin/np"
     echo "[+] NetPlus setup complete! Installed globally inside Termux as 'np'."
 else
-    ln -sf "$(pwd)/netplus.py" ~/.local/bin/np
+    ln -sf "$PROJECT_PATH/netplus.py" ~/.local/bin/np
     echo "[+] NetPlus setup complete! Make sure ~/.local/bin is in your PATH, or run via python3 netplus.py"
 fi
