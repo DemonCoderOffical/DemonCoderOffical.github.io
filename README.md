@@ -40,8 +40,11 @@ If you discover a security bug, vulnerability, or a false-positive flag from an 
 * **Interactive Mode:** Run `np` without arguments to launch the interactive text-based console menu.
 # Security & Transparency Policy
 
-Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security.
-<video width="100%" controls>
-  <source src="showcase.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security
+<p align="center">
+  <video width="100%" controls autoplay loop muted>
+    <source src="showcase.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</p>
+
