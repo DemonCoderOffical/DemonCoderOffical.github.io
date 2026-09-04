@@ -51,5 +51,6 @@ Using -O means making OS scan.
 
 Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security
 
-## Straw Linux and Linux distro it's light wight we don't support you to make it as an real operating system because we didn't finished it still working on it and have a lot of bugs you can download the terminal by pressing [here](https://github.com/VoidCoderStudio/Terminal)
-
+## Straw Linux
+Straw Linux distro it's light wight we don't support you to make it as an real operating system because we didn't finished it still working on it and have a lot of bugs you can download the terminal by pressing [here](https://github.com/VoidCoderStudio/Terminal)
+It uses pkg
