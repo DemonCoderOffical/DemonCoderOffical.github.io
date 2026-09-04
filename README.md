@@ -50,11 +50,6 @@ Using -O means making OS scan.
 # Security & Transparency Policy
 
 Thank you for using software from VoidCoderStudio. We prioritize user privacy, data isolation, and system security
-<p align="center">
-  <video width="100%" controls autoplay loop muted>
-    <source src="showcase.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</p>
+
 ## Straw Linux and Linux distro it's light wight we don't support you to make it as an real operating system because we didn't finished it still working on it and have a lot of bugs you can download the terminal by pressing [here](https://github.com/VoidCoderStudio/Terminal)
 
