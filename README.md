@@ -56,4 +56,5 @@ Thank you for using software from VoidCoderStudio. We prioritize user privacy, d
     Your browser does not support the video tag.
   </video>
 </p>
+## Straw Linux and Linux distro it's light wight we don't support you to make it as an real operating system because we didn't finished it still working on it and have a lot of bugs you can download the terminal by pressing [here](https://github.com/VoidCoderStudio/Terminal)
 
