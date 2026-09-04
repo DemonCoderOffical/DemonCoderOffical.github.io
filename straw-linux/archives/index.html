@@ -107,10 +107,9 @@
         <h1>Package Archives</h1>
         <div class="subtitle">Official software repository for Straw Linux</div>
 
-        <input type="text" id="searchInput" class="search-box" placeholder="Search packages (e.g. system, neofetch, fastfetch)..." onkeyup="filterPackages()">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search packages (e.g. system, fastfetch, nano, python)..." onkeyup="filterPackages()">
 
         <div id="packageList" class="package-list">
-            <!-- System Package Card -->
             <div class="package-card" data-name="system">
                 <div class="pkg-header">
                     <a href="system/" class="pkg-name">system</a>
@@ -120,7 +119,6 @@
                 <div class="pkg-command">pkg update</div>
             </div>
 
-            <!-- Neofetch Package Card -->
             <div class="package-card" data-name="neofetch">
                 <div class="pkg-header">
                     <a href="neofetch/" class="pkg-name">neofetch</a>
@@ -130,7 +128,6 @@
                 <div class="pkg-command">pkg install neofetch</div>
             </div>
 
-            <!-- Fastfetch Package Card -->
             <div class="package-card" data-name="fastfetch">
                 <div class="pkg-header">
                     <a href="fastfetch/" class="pkg-name">fastfetch</a>
@@ -138,6 +135,24 @@
                 </div>
                 <div class="pkg-desc">A faster, highly performant maintained alternative to neofetch written in C.</div>
                 <div class="pkg-command">pkg install fastfetch</div>
+            </div>
+
+            <div class="package-card" data-name="nano">
+                <div class="pkg-header">
+                    <a href="nano/" class="pkg-name">nano</a>
+                    <span class="pkg-version">v7.x</span>
+                </div>
+                <div class="pkg-desc">A small, user-friendly command-line text editor for editing config files and scripts.</div>
+                <div class="pkg-command">pkg install nano</div>
+            </div>
+
+            <div class="package-card" data-name="python">
+                <div class="pkg-header">
+                    <a href="python/" class="pkg-name">python</a>
+                    <span class="pkg-version">v3.x</span>
+                </div>
+                <div class="pkg-desc">A high-level programming language interpreter for running scripts and applications.</div>
+                <div class="pkg-command">pkg install python</div>
             </div>
         </div>
 
