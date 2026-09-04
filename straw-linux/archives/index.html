@@ -107,7 +107,7 @@
         <h1>Package Archives</h1>
         <div class="subtitle">Official software repository for Straw Linux</div>
 
-        <input type="text" id="searchInput" class="search-box" placeholder="Search packages (e.g. system, neofetch)..." onkeyup="filterPackages()">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search packages (e.g. system, neofetch, fastfetch)..." onkeyup="filterPackages()">
 
         <div id="packageList" class="package-list">
             <!-- System Package Card -->
@@ -128,6 +128,16 @@
                 </div>
                 <div class="pkg-desc">A command-line system information tool displaying hardware and OS specs.</div>
                 <div class="pkg-command">pkg install neofetch</div>
+            </div>
+
+            <!-- Fastfetch Package Card -->
+            <div class="package-card" data-name="fastfetch">
+                <div class="pkg-header">
+                    <a href="fastfetch/" class="pkg-name">fastfetch</a>
+                    <span class="pkg-version">v2.x</span>
+                </div>
+                <div class="pkg-desc">A faster, highly performant maintained alternative to neofetch written in C.</div>
+                <div class="pkg-command">pkg install fastfetch</div>
             </div>
         </div>
 
